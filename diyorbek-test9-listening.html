@@ -691,7 +691,7 @@ function setSpeed(rate) {
   document.querySelectorAll('.speed-btn').forEach(b => b.classList.toggle('active', parseFloat(b.textContent) === rate));
 }
 
-function loadTrackForPart(n) { audioSrc.src = audioTracks[n]; audioNum.textContent = n; player.load(); }
+function loadTrackForPart(n) { player.src = audioTracks[n]; audioNum.textContent = n; player.load(); }
 
 
 function switchPart(n) {
