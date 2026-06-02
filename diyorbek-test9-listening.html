@@ -577,7 +577,7 @@
     </div>
   </section>
 
-  <div class="submit-wrap" id="submitWrap" style="display:none">
+  <div class="submit-wrap">
     <button class="btn-submit" onclick="submitAnswers()">Submit Answers</button>
   </div>
 </main>
@@ -691,20 +691,16 @@ function setSpeed(rate) {
   document.querySelectorAll('.speed-btn').forEach(b => b.classList.toggle('active', parseFloat(b.textContent) === rate));
 }
 
-function loadTrackForPart(n) { player.src = audioTracks[n]; audioNum.textContent = n; player.load(); }
-
+function loadTrackForPart(n) { player.src = audioTracks[n]; if (audioSrc) audioSrc.src = audioTracks[n]; audioNum.textContent = n; player.load(); }
 
 function switchPart(n) {
-  document.querySelectorAll('.part-section').forEach((el,i) => {
-    el.classList.toggle('active', i+1 === n);
-  });
-  document.querySelectorAll('.part-tab').forEach((el,i) => {
-    el.classList.toggle('active', i+1 === n);
-  });
-  document.getElementById('submitWrap').style.display = n === 4 ? 'block' : 'none';
+  document.querySelectorAll('.part-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.part-tab[data-part="${n}"]`).classList.add('active');
+  document.querySelectorAll('.part-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('part-'+n).classList.add('active');
   if (currentMode !== 'simulation') loadTrackForPart(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 
 let currentMode = null, currentSimSection = 0, reviewInterval = null, simHasStarted = false;
 
@@ -819,8 +815,18 @@ function isCorrect(u, c) {
   if (u === undefined || u === null || u === '') return false;
   const userNorm = normStr(u);
   if (!userNorm) return false;
-  if (Array.isArray(c)) return c.some(v => normStr(v) === userNorm);
-  return normStr(c) === userNorm;
+  const digitsOnly = s => s.replace(/[^\d]/g,'');
+  const userDigits = digitsOnly(userNorm);
+  const tryMatch = v => {
+    const vNorm = normStr(v);
+    if (vNorm === userNorm) return true;
+    // Digit-sequence match (phone numbers, postcodes, etc.)
+    const vDigits = digitsOnly(vNorm);
+    if (userDigits && vDigits && userDigits.length >= 4 && userDigits === vDigits) return true;
+    return false;
+  };
+  if (Array.isArray(c)) return c.some(tryMatch);
+  return tryMatch(c);
 }
 
 function multiPoints(qKey, ua) {
