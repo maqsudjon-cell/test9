@@ -702,6 +702,7 @@ function switchPart(n) {
     el.classList.toggle('active', i+1 === n);
   });
   document.getElementById('submitWrap').style.display = n === 4 ? 'block' : 'none';
+  if (currentMode !== 'simulation') loadTrackForPart(n);
 }
 
 
